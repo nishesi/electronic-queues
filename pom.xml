@@ -9,9 +9,9 @@
 		<relativePath/>
 	</parent>
 	<groupId>ru.seminar.homework</groupId>
-	<artifactId>hw5</artifactId>
+	<artifactId>hw6</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>hw5</name>
+	<name>hw6</name>
 	<description>Домашняя работа по api</description>
 	<properties>
 		<java.version>17</java.version>
