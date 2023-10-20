@@ -1,0 +1,323 @@
+openapi: 3.0.1
+info:
+  title: Проект электронных очередей
+  version: v1
+servers:
+  - url: http://localhost:8081
+    description: Generated server url
+paths:
+  /task:
+    get:
+      tags:
+        - Task
+      summary: получение следующей задачи со статусом ожидание
+      operationId: getNextWaitingTask
+      responses:
+        "404":
+          description: очередь пуста
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "200":
+          description: ожидающая задача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+    post:
+      tags:
+        - Task
+      summary: создание задачи
+      operationId: addTask
+      responses:
+        "201":
+          description: задача успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+  /task/{number}:
+    delete:
+      tags:
+        - Task
+      summary: удаление задачи
+      operationId: deleteTask
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            pattern: "[0-9A-zА-я]+"
+            type: string
+      responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
+        "202":
+          description: задача успешно удалена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+    patch:
+      tags:
+        - Task
+      summary: Изменение статуса задачи
+      operationId: updateTaskStatus
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            pattern: "[0-9A-zА-я]+"
+            type: string
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - NEW
+              - WAITING
+              - PROCESSED
+              - CLOSE
+              - CANCEL
+      responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
+        "202":
+          description: статус успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+  /times:
+    get:
+      tags:
+        - Manager
+      description: получение среднего времени обработки задач
+      operationId: getAverageTaskProcessingTime
+      responses:
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /times/{status}:
+    get:
+      tags:
+        - Manager
+      description: получение среднего времени обработки статуса
+      operationId: getAverageStatusProcessingTime
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - NEW
+              - WAITING
+              - PROCESSED
+              - CLOSE
+              - CANCEL
+      responses:
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /times/{number}:
+    get:
+      tags:
+        - Manager
+      description: получение времени выполнения определенной задачи
+      operationId: getTaskProcessingTime
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            pattern: "[0-9A-zА-я]+"
+            type: string
+      responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /times/{number}/{status}:
+    get:
+      tags:
+        - Manager
+      description: получение времени нахождения задачи в определенном статусе
+      operationId: getTaskStatusProcessingTime
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            pattern: "[0-9A-zА-я]+"
+            type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - NEW
+              - WAITING
+              - PROCESSED
+              - CLOSE
+              - CANCEL
+      responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /tasks:
+    get:
+      tags:
+        - Task
+      summary: получение задач сгруппированных по статусам
+      operationId: getStatusesAndTasksMap
+      responses:
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusesWithTasksDto'
+components:
+  schemas:
+    TaskDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: идентификатор задачи
+        status:
+          type: string
+          description: текущий статус задачи
+          enum:
+            - NEW
+            - WAITING
+            - PROCESSED
+            - CLOSE
+            - CANCEL
+      description: задача
+    ExceptionDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: код ошибки
+        message:
+          type: string
+          description: описание ошибки
+      description: информация об ошибке
+    ValidationErrorDto:
+      type: object
+      properties:
+        object:
+          type: string
+          description: идентификатор объекта
+        field:
+          type: string
+          description: идентификатор поля
+        value:
+          type: string
+          description: невалидное значение
+        message:
+          type: string
+          description: описание ошибки
+      description: описание ошибки валидации поля
+    ValidationErrorsDto:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: список ошибок валидации
+          items:
+            $ref: '#/components/schemas/ValidationErrorDto'
+    LocalTime:
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int32
+        minute:
+          type: integer
+          format: int32
+        second:
+          type: integer
+          format: int32
+        nano:
+          type: integer
+          format: int32
+      description: время обработки
+    TimeDto:
+      type: object
+      properties:
+        time:
+          $ref: '#/components/schemas/LocalTime'
+    StatusesWithTasksDto:
+      type: object
+      properties:
+        statuses:
+          type: object
+          additionalProperties:
+            type: array
+            description: карта задач с соответствующими статусами
+            items:
+              $ref: '#/components/schemas/TaskDto'
+          description: карта задач с соответствующими статусами
