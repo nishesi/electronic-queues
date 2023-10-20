@@ -51,12 +51,6 @@ paths:
             pattern: "[0-9A-zА-я]+"
             type: string
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -69,6 +63,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
     patch:
       tags:
         - Task
@@ -93,12 +93,6 @@ paths:
               - CLOSE
               - CANCEL
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -111,6 +105,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
   /times:
     get:
       tags:
@@ -163,12 +163,6 @@ paths:
             pattern: "[0-9A-zА-я]+"
             type: string
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -181,6 +175,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimeDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
   /times/{number}/{status}:
     get:
       tags:
@@ -206,12 +206,6 @@ paths:
               - CLOSE
               - CANCEL
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -224,6 +218,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimeDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
   /tasks:
     get:
       tags:
@@ -236,7 +236,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusesWithTasksDto'
+                $ref: '#/components/schemas/StatusesWithTaskNumbersDto'
 components:
   schemas:
     TaskDto:
@@ -254,17 +254,14 @@ components:
             - PROCESSED
             - CLOSE
             - CANCEL
+        times:
+          type: object
+          additionalProperties:
+            type: integer
+            description: времена нахождения в определенных статусах (в сек.)
+            format: int64
+          description: времена нахождения в определенных статусах (в сек.)
       description: задача
-    ExceptionDto:
-      type: object
-      properties:
-        code:
-          type: string
-          description: код ошибки
-        message:
-          type: string
-          description: описание ошибки
-      description: информация об ошибке
     ValidationErrorDto:
       type: object
       properties:
@@ -289,35 +286,32 @@ components:
           description: список ошибок валидации
           items:
             $ref: '#/components/schemas/ValidationErrorDto'
-    LocalTime:
+    ExceptionDto:
       type: object
       properties:
-        hour:
-          type: integer
-          format: int32
-        minute:
-          type: integer
-          format: int32
-        second:
-          type: integer
-          format: int32
-        nano:
-          type: integer
-          format: int32
-      description: время обработки
+        code:
+          type: string
+          description: код ошибки
+        message:
+          type: string
+          description: описание ошибки
+      description: информация об ошибке
     TimeDto:
       type: object
       properties:
         time:
-          $ref: '#/components/schemas/LocalTime'
-    StatusesWithTasksDto:
+          type: integer
+          description: время обработки (в сек.)
+          format: int64
+    StatusesWithTaskNumbersDto:
       type: object
       properties:
-        statuses:
+        content:
           type: object
           additionalProperties:
             type: array
             description: карта задач с соответствующими статусами
             items:
-              $ref: '#/components/schemas/TaskDto'
+              type: string
+              description: карта задач с соответствующими статусами
           description: карта задач с соответствующими статусами

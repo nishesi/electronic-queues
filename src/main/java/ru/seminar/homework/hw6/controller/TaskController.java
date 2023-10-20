@@ -2,7 +2,7 @@ package ru.seminar.homework.hw6.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import ru.seminar.homework.hw6.dto.StatusesWithTasksDto;
+import ru.seminar.homework.hw6.dto.StatusesWithTaskNumbersDto;
 import ru.seminar.homework.hw6.dto.TaskDto;
 
 @RestController
@@ -23,7 +23,7 @@ public class TaskController implements TaskApi  {
     }
 
     @Override
-    public ResponseEntity<StatusesWithTasksDto> getStatusesAndTasksMap() {
+    public ResponseEntity<StatusesWithTaskNumbersDto> getStatusesAndTasksMap() {
         return TaskApi.super.getStatusesAndTasksMap();
     }
 
