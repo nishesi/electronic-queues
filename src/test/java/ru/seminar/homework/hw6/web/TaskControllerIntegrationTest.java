@@ -35,9 +35,6 @@ public class TaskControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Nested
     public class test_endpoint_POST_task {
 
@@ -226,6 +223,22 @@ public class TaskControllerIntegrationTest {
             mockMvc.perform(
                             patch("/task/%s".formatted(unknownId))
                                     .queryParam("status", "WAITING"))
+                    .andExpect(
+                            status().isNotFound())
+                    .andExpect(
+                            jsonPath("$.code").value("404"))
+                    .andExpect(
+                            jsonPath("$.message").exists());
+        }
+
+        @Test
+        public void should_return_bad_request_if_new_status_empty() throws Exception {
+            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
+            String id = JsonPath.parse(
+                            mvcResult.getResponse().getContentAsString())
+                    .read("$.id");
+            mockMvc.perform(
+                            patch("/task/%s".formatted(id)))
                     .andExpect(
                             status().isNotFound())
                     .andExpect(
