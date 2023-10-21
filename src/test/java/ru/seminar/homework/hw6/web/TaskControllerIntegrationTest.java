@@ -1,6 +1,5 @@
 package ru.seminar.homework.hw6.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,13 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.seminar.homework.hw6.enums.TaskStatus.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 public class TaskControllerIntegrationTest {
 
     @Autowired
@@ -54,9 +54,7 @@ public class TaskControllerIntegrationTest {
             Set<String> ids = new HashSet<>();
 
             for (int i = 0; i < 10; i++) {
-                MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-                String body = mvcResult.getResponse().getContentAsString();
-                String id = JsonPath.parse(body).read("$.id");
+                String id = createTaskAndGetId();
                 boolean added = ids.add(id);
                 assertThat(added).isTrue();
             }
@@ -85,9 +83,7 @@ public class TaskControllerIntegrationTest {
 
         @Test
         public void should_return_correct_task() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String body = mvcResult.getResponse().getContentAsString();
-            String id = JsonPath.parse(body).read("$.id");
+            String id = createTaskAndGetId();
 
             for (int i = 0; i < 5; i++) {
                 mockMvc.perform(post("/task"));
@@ -109,9 +105,7 @@ public class TaskControllerIntegrationTest {
     public class test_endpoint_PATCH_task {
         @Test
         public void should_return_status_code_accepted_and_update_status() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String body = mvcResult.getResponse().getContentAsString();
-            String id = JsonPath.parse(body).read("$.id");
+            String id = createTaskAndGetId();
 
             mockMvc.perform(
                             patch("/task/%s".formatted(id))
@@ -148,10 +142,7 @@ public class TaskControllerIntegrationTest {
 
         @Test
         public void should_return_validation_error_on_incorrect_status() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String id = JsonPath.parse(
-                            mvcResult.getResponse().getContentAsString())
-                    .read("$.id");
+            String id = createTaskAndGetId();
 
             String illegalStatus = "UNKNOWN_STATUS";
             mockMvc.perform(
@@ -175,10 +166,7 @@ public class TaskControllerIntegrationTest {
 
         @Test
         public void should_return_bad_request_if_updating_of_status_is_incorrect() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String id = JsonPath.parse(
-                            mvcResult.getResponse().getContentAsString())
-                    .read("$.id");
+            String id = createTaskAndGetId();
 
             BiConsumer<TaskStatus, ResultMatcher> checker = (status, expected) -> {
                 try {
@@ -233,10 +221,7 @@ public class TaskControllerIntegrationTest {
 
         @Test
         public void should_return_bad_request_if_new_status_empty() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String id = JsonPath.parse(
-                            mvcResult.getResponse().getContentAsString())
-                    .read("$.id");
+            String id = createTaskAndGetId();
             mockMvc.perform(
                             patch("/task/%s".formatted(id)))
                     .andExpect(
@@ -265,10 +250,7 @@ public class TaskControllerIntegrationTest {
 
         @Test
         public void should_delete_task() throws Exception {
-            MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-            String id = JsonPath.parse(
-                            mvcResult.getResponse().getContentAsString())
-                    .read("$.id");
+            String id = createTaskAndGetId();
 
             mockMvc.perform(
                             delete("/task/%s".formatted(id)))
@@ -343,11 +325,7 @@ public class TaskControllerIntegrationTest {
             //sets status of task to specified from array
             Function<Integer, String> prepareTaskAndGetId = (statusId) -> {
                 try {
-                    MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-
-                    String id = JsonPath.parse(
-                                    mvcResult.getResponse().getContentAsString())
-                            .read("$.id");
+                    String id = createTaskAndGetId();
                     for (int i = 0; i < statusId; i++) {
                         mockMvc.perform(
                                         patch("/task/%s".formatted(id))
@@ -368,5 +346,12 @@ public class TaskControllerIntegrationTest {
                     prepareTaskAndGetId.apply(4),
             };
         }
+    }
+
+    private String createTaskAndGetId() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
+        String body = mvcResult.getResponse().getContentAsString();
+        assertThat(body).isNotNull().isNotBlank();
+        return JsonPath.parse(body).read("$.id");
     }
 }

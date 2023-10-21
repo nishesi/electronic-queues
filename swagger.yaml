@@ -140,8 +140,6 @@ paths:
               - NEW
               - WAITING
               - PROCESSED
-              - CLOSE
-              - CANCEL
       responses:
         "200":
           description: запрос успешно обработан
@@ -203,8 +201,6 @@ paths:
               - NEW
               - WAITING
               - PROCESSED
-              - CLOSE
-              - CANCEL
       responses:
         "400":
           description: невалидные аргументы
