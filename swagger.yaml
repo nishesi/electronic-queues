@@ -3,7 +3,7 @@ info:
   title: Проект электронных очередей
   version: v1
 servers:
-  - url: http://localhost:8081
+  - url: http://localhost:8080
     description: Generated server url
 paths:
   /task:
@@ -202,18 +202,18 @@ paths:
               - WAITING
               - PROCESSED
       responses:
-        "400":
-          description: невалидные аргументы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorsDto'
         "200":
           description: запрос успешно обработан
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimeDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
         "404":
           description: задача не найдена
           content:
@@ -225,7 +225,7 @@ paths:
       tags:
         - Task
       summary: получение задач сгруппированных по статусам
-      operationId: getStatusesAndTasksMap
+      operationId: getTaskNumbersGroupedByStatuses
       responses:
         "200":
           description: запрос успешно обработан
