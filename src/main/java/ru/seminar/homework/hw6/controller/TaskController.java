@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.seminar.homework.hw6.dto.StatusesWithTaskNumbersDto;
 import ru.seminar.homework.hw6.dto.TaskDto;
 import ru.seminar.homework.hw6.dto.UpdateTaskDto;
+import ru.seminar.homework.hw6.enums.TaskStatus;
 import ru.seminar.homework.hw6.service.TaskService;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class TaskController implements TaskApi  {
     }
 
     @Override
-    public ResponseEntity<TaskDto> updateTaskStatus(String number, String status) {
+    public ResponseEntity<TaskDto> updateTaskStatus(String number, TaskStatus status) {
         TaskDto task = taskService.updateTask(new UpdateTaskDto(number, status));
         return ResponseEntity.accepted().body(task);
     }

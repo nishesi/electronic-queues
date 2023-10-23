@@ -51,24 +51,24 @@ paths:
             pattern: "[0-9A-zА-я]+"
             type: string
       responses:
-        "400":
-          description: невалидные аргументы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorsDto'
-        "202":
-          description: задача успешно удалена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskDto'
         "404":
           description: задача не найдена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionDto'
+        "202":
+          description: задача успешно удалена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
     patch:
       tags:
         - Task
@@ -85,32 +85,26 @@ paths:
           in: query
           required: true
           schema:
-            type: string
-            enum:
-              - NEW
-              - WAITING
-              - PROCESSED
-              - CLOSE
-              - CANCEL
+            $ref: '#/components/schemas/TaskStatus'
       responses:
-        "400":
-          description: невалидные аргументы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorsDto'
-        "202":
-          description: статус успешно обновлен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskDto'
         "404":
           description: задача не найдена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionDto'
+        "202":
+          description: статус успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
   /times:
     get:
       tags:
@@ -161,24 +155,24 @@ paths:
             pattern: "[0-9A-zА-я]+"
             type: string
       responses:
-        "400":
-          description: невалидные аргументы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorsDto'
-        "200":
-          description: запрос успешно обработан
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimeDto'
         "404":
           description: задача не найдена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionDto'
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
   /times/{number}/{status}:
     get:
       tags:
@@ -202,6 +196,12 @@ paths:
               - WAITING
               - PROCESSED
       responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
         "200":
           description: запрос успешно обработан
           content:
@@ -214,12 +214,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsDto'
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
   /tasks:
     get:
       tags:
@@ -238,26 +232,31 @@ components:
     TaskDto:
       type: object
       properties:
-        id:
+        number:
           type: string
           description: идентификатор задачи
         status:
-          type: string
-          description: текущий статус задачи
-          enum:
-            - NEW
-            - WAITING
-            - PROCESSED
-            - CLOSE
-            - CANCEL
-        times:
-          type: object
-          additionalProperties:
-            type: integer
-            description: времена нахождения в определенных статусах (в сек.)
-            format: int64
-          description: времена нахождения в определенных статусах (в сек.)
+          $ref: '#/components/schemas/TaskStatus'
       description: задача
+    TaskStatus:
+      type: string
+      description: текущий статус задачи
+      enum:
+        - NEW
+        - WAITING
+        - PROCESSED
+        - CLOSE
+        - CANCEL
+    ExceptionDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: код ошибки
+        message:
+          type: string
+          description: описание ошибки
+      description: информация об ошибке
     ValidationErrorDto:
       type: object
       properties:
@@ -282,16 +281,6 @@ components:
           description: список ошибок валидации
           items:
             $ref: '#/components/schemas/ValidationErrorDto'
-    ExceptionDto:
-      type: object
-      properties:
-        code:
-          type: string
-          description: код ошибки
-        message:
-          type: string
-          description: описание ошибки
-      description: информация об ошибке
     TimeDto:
       type: object
       properties:

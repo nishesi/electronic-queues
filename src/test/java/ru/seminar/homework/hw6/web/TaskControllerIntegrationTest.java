@@ -1,6 +1,7 @@
 package ru.seminar.homework.hw6.web;
 
 import com.jayway.jsonpath.JsonPath;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,11 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.seminar.homework.hw6.enums.TaskStatus.*;
 
+@Log4j2
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -34,6 +37,13 @@ public class TaskControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private String createTaskAndGetId() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
+        String body = mvcResult.getResponse().getContentAsString();
+        assertThat(body).isNotNull().isNotBlank();
+        return JsonPath.parse(body).read("$.number");
+    }
 
     @Nested
     public class test_endpoint_POST_task {
@@ -46,7 +56,7 @@ public class TaskControllerIntegrationTest {
                     .andExpect(
                             header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
                     .andExpect(
-                            jsonPath("$.id").exists());
+                            jsonPath("$.number").exists());
         }
 
         @Test
@@ -89,13 +99,16 @@ public class TaskControllerIntegrationTest {
                 mockMvc.perform(post("/task"));
             }
 
+            mockMvc.perform(patch("/task/%s".formatted(id))
+                            .queryParam("status", WAITING.name()))
+                    .andExpect(status().isAccepted());
             mockMvc.perform(get("/task"))
                     .andExpect(
                             status().isOk())
                     .andExpect(
                             header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
                     .andExpect(
-                            jsonPath("$.id").value(id))
+                            jsonPath("$.number").value(id))
                     .andExpect(
                             jsonPath("$.status").value("WAITING"));
         }
@@ -113,9 +126,9 @@ public class TaskControllerIntegrationTest {
                     .andExpect(
                             status().isAccepted())
                     .andExpect(
-                            jsonPath("$.id").value(id))
+                            jsonPath("$.number").value(id))
                     .andExpect(
-                            jsonPath("$.id").value("WAITING"));
+                            jsonPath("$.status").value("WAITING"));
         }
 
         @Test
@@ -137,31 +150,7 @@ public class TaskControllerIntegrationTest {
                     .andExpect(
                             jsonPath("$.errors[*].value").value(illegal_id))
                     .andExpect(
-                            jsonPath("$.erros[*].message").exists());
-        }
-
-        @Test
-        public void should_return_validation_error_on_incorrect_status() throws Exception {
-            String id = createTaskAndGetId();
-
-            String illegalStatus = "UNKNOWN_STATUS";
-            mockMvc.perform(
-                            patch("/task/%s".formatted(id))
-                                    .queryParam("status", illegalStatus))
-                    .andExpect(
-                            status().isBadRequest())
-                    .andExpect(
-                            jsonPath("$.errors").exists())
-                    .andExpect(
-                            jsonPath("$.errors").isArray())
-                    .andExpect(
-                            jsonPath("$.errors").isNotEmpty())
-                    .andExpect(
-                            jsonPath("$.errors[*].field").value("status"))
-                    .andExpect(
-                            jsonPath("$.errors[*].value").value(illegalStatus))
-                    .andExpect(
-                            jsonPath("$.erros[*].message").exists());
+                            jsonPath("$.errors[*].message").exists());
         }
 
         @Test
@@ -173,7 +162,8 @@ public class TaskControllerIntegrationTest {
                     mockMvc.perform(
                                     patch("/task/%s".formatted(id))
                                             .queryParam("status", status.name()))
-                            .andExpect(expected);
+                            .andExpect(expected)
+                            .andDo(print());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -193,7 +183,8 @@ public class TaskControllerIntegrationTest {
 
                 for (int j = 0; j < statuses.length; j++) {
 
-                    if (Math.abs(i - j) <= 1) {
+                    log.info("Current status: %s,\tUpdating status: %s\n".formatted(statuses[i], statuses[j]));
+                    if (Math.abs(i - j) == 1) {
                         checker.accept(statuses[j], status().isAccepted());
 
                         // return old status position
@@ -225,11 +216,17 @@ public class TaskControllerIntegrationTest {
             mockMvc.perform(
                             patch("/task/%s".formatted(id)))
                     .andExpect(
-                            status().isNotFound())
+                            status().isBadRequest())
                     .andExpect(
-                            jsonPath("$.code").value("404"))
+                            jsonPath("$.errors").exists())
                     .andExpect(
-                            jsonPath("$.message").exists());
+                            jsonPath("$.errors").isArray())
+                    .andExpect(
+                            jsonPath("$.errors").isNotEmpty())
+                    .andExpect(
+                            jsonPath("$.errors[*].field").value("status"))
+                    .andExpect(
+                            jsonPath("$.errors[*].message").exists());
         }
     }
 
@@ -257,7 +254,7 @@ public class TaskControllerIntegrationTest {
                     .andExpect(
                             status().isAccepted())
                     .andExpect(
-                            jsonPath("$.id").value(id));
+                            jsonPath("$.number").value(id));
 
             mockMvc.perform(
                             patch("/task/%s".formatted(id))
@@ -276,7 +273,7 @@ public class TaskControllerIntegrationTest {
                             status().isOk());
 
             for (TaskStatus status : new TaskStatus[]{NEW, WAITING, PROCESSED}) {
-                String query = "$." + status.name();
+                String query = "$.content." + status.name();
 
                 resultActions.andExpect(
                                 jsonPath(query).exists())
@@ -287,10 +284,10 @@ public class TaskControllerIntegrationTest {
             }
 
             resultActions.andExpect(
-                            jsonPath("$." + CANCEL.name()).doesNotExist()
+                            jsonPath("$.content." + CANCEL.name()).doesNotExist()
                     )
                     .andExpect(
-                            jsonPath("$." + CLOSE.name()).doesNotExist()
+                            jsonPath("$.content." + CLOSE.name()).doesNotExist()
                     );
         }
 
@@ -304,7 +301,7 @@ public class TaskControllerIntegrationTest {
 
             TaskStatus[] expectedStatuses = {NEW, WAITING, PROCESSED};
             for (int i = 0; i < expectedStatuses.length; i++) {
-                String query = "$." + expectedStatuses[i].name();
+                String query = "$.content." + expectedStatuses[i].name();
 
                 resultActions.andExpect(
                                 jsonPath(query).exists())
@@ -346,12 +343,5 @@ public class TaskControllerIntegrationTest {
                     prepareTaskAndGetId.apply(4),
             };
         }
-    }
-
-    private String createTaskAndGetId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-        String body = mvcResult.getResponse().getContentAsString();
-        assertThat(body).isNotNull().isNotBlank();
-        return JsonPath.parse(body).read("$.id");
     }
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.seminar.homework.hw6.enums.TaskStatus;
 
 @Data
 @Builder
@@ -11,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateTaskDto {
     private String number;
-    private String status;
+    private TaskStatus status;
 }
