@@ -28,6 +28,13 @@ public class ManagerControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private String createTaskAndGetId() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
+        String body = mvcResult.getResponse().getContentAsString();
+        assertThat(body).isNotNull().isNotBlank();
+        return JsonPath.parse(body).read("$.number");
+    }
+
     @Nested
     public class test_endpoint_GET_times {
 
@@ -46,15 +53,14 @@ public class ManagerControllerIntegrationTest {
     }
 
     @Nested
-    public class test_endpoint_GET_times_$status {
+    public class test_endpoint_GET_times_status {
         @Test
         public void should_return_status_ok_and_time() throws Exception {
             TaskStatus[] statuses = {NEW, WAITING, PROCESSED};
 
             for (var status : statuses) {
-                mockMvc.perform(get(
-                                "/times/%s".formatted(status.name())
-                        ))
+                mockMvc.perform(get("/times/status")
+                                .queryParam("status", status.name()))
                         .andExpect(
                                 status().isOk())
                         .andExpect(
@@ -71,9 +77,8 @@ public class ManagerControllerIntegrationTest {
             TaskStatus[] statuses = {CANCEL, CLOSE};
 
             for (var status : statuses) {
-                mockMvc.perform(get(
-                                "/times/%s".formatted(status.name())
-                        ))
+                mockMvc.perform(get("/times/status")
+                                .queryParam("status", status.name()))
                         .andExpect(
                                 status().isBadRequest())
                         .andExpect(
@@ -83,10 +88,11 @@ public class ManagerControllerIntegrationTest {
     }
 
     @Nested
-    public class test_endpoint_GET_times_$number {
+    public class test_endpoint_GET_times_number {
         @Test
         public void should_return_not_found_on_unknown_number() throws Exception {
-            mockMvc.perform(get("/times/ABC123"))
+            mockMvc.perform(get("/times/number")
+                            .queryParam("number", "ABC123"))
                     .andExpect(
                             status().isNotFound())
                     .andExpect(
@@ -103,7 +109,8 @@ public class ManagerControllerIntegrationTest {
                 mockMvc.perform(post("/task"));
             }
 
-            mockMvc.perform(get("/times/%s".formatted(id)))
+            mockMvc.perform(get("/times/number")
+                            .queryParam("number", id))
                     .andExpect(
                             status().isOk())
                     .andExpect(
@@ -113,13 +120,6 @@ public class ManagerControllerIntegrationTest {
                     .andExpect(
                             jsonPath("$.time").isNumber());
         }
-    }
-
-    private String createTaskAndGetId() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(post("/task")).andReturn();
-        String body = mvcResult.getResponse().getContentAsString();
-        assertThat(body).isNotNull().isNotBlank();
-        return JsonPath.parse(body).read("$.id");
     }
 
     @Nested

@@ -6,8 +6,12 @@ import ru.seminar.homework.hw6.enums.TaskStatus;
 import ru.seminar.homework.hw6.exception.DaoException;
 import ru.seminar.homework.hw6.model.Task;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static ru.seminar.homework.hw6.enums.TaskStatus.CANCEL;
+import static ru.seminar.homework.hw6.enums.TaskStatus.CLOSE;
 
 @Repository
 public class TaskRepositoryImpl implements TaskRepository {
@@ -48,12 +52,48 @@ public class TaskRepositoryImpl implements TaskRepository {
                 .toList();
     }
 
+    @Override
+    public Duration getAverageTasksProcessingTime() {
+        List<Duration> times = data.values().stream()
+                .filter(t -> t.getStatus() != CANCEL && t.getStatus() != CLOSE)
+                .map(t -> t.getTimes().values().stream()
+                        .reduce(Duration::plus)
+                        .orElse(Duration.ZERO))
+                .toList();
+        if (times.isEmpty())
+            return Duration.ZERO;
+        return times.stream()
+                .reduce(Duration::plus)
+                .orElse(Duration.ZERO)
+                .dividedBy(times.size());
+    }
+
+    @Override
+    public Duration getAverageStatusProcessingTime(TaskStatus status) {
+        List<Duration> times = data.values().stream()
+                .filter(t -> t.getStatus() != CANCEL && t.getStatus() != CLOSE)
+                .map(t -> t.getTimes().get(status))
+                .toList();
+
+        if (times.isEmpty())
+            return Duration.ZERO;
+        return times.stream()
+                .reduce(Duration::plus)
+                .orElse(Duration.ZERO)
+                .dividedBy(times.size());
+    }
+
     private Task clone(Task task) {
         if (Objects.isNull(task)) return null;
+
+        Map<TaskStatus, Duration> newMap = new HashMap<>();
+        for (var status : TaskStatus.values)
+            newMap.put(status, task.getTimes().getOrDefault(status, Duration.ZERO));
+
         return new Task(
                 task.getNumber(),
                 task.getStatus(),
-                task.getLastChangedAt(),
-                new HashMap<>(task.getTimes()));
+                task.getLastUpdatedAt(),
+                newMap);
     }
 }

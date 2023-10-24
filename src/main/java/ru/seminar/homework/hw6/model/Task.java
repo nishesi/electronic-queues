@@ -18,7 +18,7 @@ import java.util.Objects;
 public class Task {
     private String number;
     private TaskStatus status;
-    private LocalDateTime lastChangedAt;
+    private LocalDateTime lastUpdatedAt;
     // Duration sets during status updating
     // Duration = "old duration" + "interval between now and lastChangedAt"
     private Map<TaskStatus, Duration> times;

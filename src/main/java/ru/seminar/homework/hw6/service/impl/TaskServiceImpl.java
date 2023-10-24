@@ -86,7 +86,7 @@ public class TaskServiceImpl implements TaskService {
 
         // calculate and save stay time in status
         Duration duration = task.getTimes().getOrDefault(task.getStatus(), Duration.ZERO);
-        duration = duration.plus(Duration.between(task.getLastChangedAt(), LocalDateTime.now()));
+        duration = duration.plus(Duration.between(task.getLastUpdatedAt(), LocalDateTime.now()));
         task.getTimes().put(task.getStatus(), duration);
 
         task.setStatus(dto.getStatus());

@@ -13,18 +13,18 @@ paths:
       summary: получение следующей задачи со статусом ожидание
       operationId: getNextWaitingTask
       responses:
-        "404":
-          description: очередь пуста
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "200":
           description: ожидающая задача
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskDto'
+        "404":
+          description: очередь пуста
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
     post:
       tags:
         - Task
@@ -51,18 +51,18 @@ paths:
             pattern: "[0-9A-zА-я]+"
             type: string
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "202":
           description: задача успешно удалена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -87,18 +87,18 @@ paths:
           schema:
             $ref: '#/components/schemas/TaskStatus'
       responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
         "202":
           description: статус успешно обновлен
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskDto'
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
         "400":
           description: невалидные аргументы
           content:
@@ -118,61 +118,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimeDto'
-  /times/{status}:
-    get:
-      tags:
-        - Manager
-      description: получение среднего времени обработки статуса
-      operationId: getAverageStatusProcessingTime
-      parameters:
-        - name: status
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - NEW
-              - WAITING
-              - PROCESSED
-      responses:
-        "200":
-          description: запрос успешно обработан
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimeDto'
-  /times/{number}:
-    get:
-      tags:
-        - Manager
-      description: получение времени выполнения определенной задачи
-      operationId: getTaskProcessingTime
-      parameters:
-        - name: number
-          in: path
-          required: true
-          schema:
-            pattern: "[0-9A-zА-я]+"
-            type: string
-      responses:
-        "404":
-          description: задача не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExceptionDto'
-        "200":
-          description: запрос успешно обработан
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimeDto'
-        "400":
-          description: невалидные аргументы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorsDto'
   /times/{number}/{status}:
     get:
       tags:
@@ -202,18 +147,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionDto'
-        "200":
-          description: запрос успешно обработан
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimeDto'
         "400":
           description: невалидные аргументы
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsDto'
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /times/status:
+    get:
+      tags:
+        - Manager
+      description: получение среднего времени обработки статуса
+      operationId: getAverageStatusProcessingTime
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - NEW
+              - WAITING
+              - PROCESSED
+      responses:
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
+  /times/number:
+    get:
+      tags:
+        - Manager
+      description: получение времени выполнения определенной задачи
+      operationId: getTaskProcessingTime
+      parameters:
+        - name: number
+          in: query
+          required: true
+          schema:
+            pattern: "[0-9A-zА-я]+"
+            type: string
+      responses:
+        "404":
+          description: задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionDto'
+        "400":
+          description: невалидные аргументы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsDto'
+        "200":
+          description: запрос успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeDto'
   /tasks:
     get:
       tags:
