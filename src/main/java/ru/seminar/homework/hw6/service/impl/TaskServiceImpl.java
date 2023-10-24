@@ -13,6 +13,7 @@ import ru.seminar.homework.hw6.model.Task;
 import ru.seminar.homework.hw6.service.IdGenerator;
 import ru.seminar.homework.hw6.service.TaskService;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -29,11 +30,18 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final IdGenerator idGenerator;
     private final TaskMapper taskMapper;
+    private final Clock clock;
     private final Queue<Task> taskQueue = new ConcurrentLinkedQueue<>();
+
+    private void updateStatusTime(Task task) {
+        Duration duration = task.getTimes().get(task.getStatus());
+        duration = duration.plus(Duration.between(task.getLastUpdatedAt(), LocalDateTime.now(clock)));
+        task.getTimes().put(task.getStatus(), duration);
+    }
 
     @Override
     public TaskDto createTask() {
-        Task task = new Task(idGenerator.generate(), NEW, LocalDateTime.now(), new HashMap<>());
+        Task task = new Task(idGenerator.generate(), NEW, LocalDateTime.now(clock), new HashMap<>());
         task = taskRepository.save(task);
         return taskMapper.from(task);
     }
@@ -85,13 +93,30 @@ public class TaskServiceImpl implements TaskService {
         else if (task.getStatus() == WAITING) taskQueue.remove(task);
 
         // calculate and save stay time in status
-        Duration duration = task.getTimes().getOrDefault(task.getStatus(), Duration.ZERO);
-        duration = duration.plus(Duration.between(task.getLastUpdatedAt(), LocalDateTime.now()));
-        task.getTimes().put(task.getStatus(), duration);
+        updateStatusTime(task);
 
         task.setStatus(dto.getStatus());
         task = taskRepository.save(task);
 
         return taskMapper.from(task);
+    }
+
+    @Override
+    public void cancelLongTasks() {
+        List<Task> tasks = taskRepository.findAll();
+        for (Task task : tasks) {
+            TaskStatus status = task.getStatus();
+
+            if (status == WAITING || status == PROCESSED) {
+                LocalDateTime time = task.getLastUpdatedAt().plus(Duration.ofMinutes(30));
+                LocalDateTime now = LocalDateTime.now(clock);
+                if (time.isBefore(now)) {
+                    updateStatusTime(task);
+                    task.setStatus(CANCEL);
+                    task.setLastUpdatedAt(now);
+                }
+            }
+        }
+        taskRepository.saveAll(tasks);
     }
 }

@@ -10,6 +10,7 @@ import ru.seminar.homework.hw6.exception.ServiceValidationException;
 import ru.seminar.homework.hw6.model.Task;
 import ru.seminar.homework.hw6.service.StatisticsService;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -20,6 +21,7 @@ import static ru.seminar.homework.hw6.enums.TaskStatus.*;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
     private final TaskRepository taskRepository;
+    private final Clock clock;
 
     private static TaskStatus parseStatus(String status) {
         try {
@@ -43,7 +45,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         Map<TaskStatus, Duration> times = task.getTimes();
         Duration plus = times.get(NEW).plus(times.get(WAITING)).plus(times.get(PROCESSED));
         if (task.getStatus() != CANCEL && task.getStatus() != CLOSE)
-            plus = plus.plus(Duration.between(task.getLastUpdatedAt(), LocalDateTime.now()));
+            plus = plus.plus(Duration.between(task.getLastUpdatedAt(), LocalDateTime.now(clock)));
 
         return new TimeDto().time(plus.getSeconds());
     }

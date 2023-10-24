@@ -83,6 +83,18 @@ public class TaskRepositoryImpl implements TaskRepository {
                 .dividedBy(times.size());
     }
 
+    @Override
+    public List<Task> findAll() {
+        return data.values().stream()
+                .map(this::clone)
+                .toList();
+    }
+
+    @Override
+    public void saveAll(List<Task> tasks) {
+        tasks.forEach(this::save);
+    }
+
     private Task clone(Task task) {
         if (Objects.isNull(task)) return null;
 

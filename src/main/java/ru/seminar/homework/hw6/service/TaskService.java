@@ -16,4 +16,6 @@ public interface TaskService {
     Map<String, List<String>> getTaskNumbersGroupedByStatuses();
 
     TaskDto updateTask(UpdateTaskDto dto);
+
+    void cancelLongTasks();
 }

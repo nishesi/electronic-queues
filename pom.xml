@@ -91,6 +91,18 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jococo.maven.plugin.version}</version>
+				<configuration>
+					<excludes>
+						<exclude>ru/seminar/**/dto/*</exclude>
+						<exclude>ru/seminar/**/enums/*</exclude>
+						<exclude>ru/seminar/**/model/*</exclude>
+						<exclude>ru/seminar/**/exception/*</exclude>
+						<exclude>ru/seminar/**/controller/api/*</exclude>
+					</excludes>
+					<outputDirectory>
+						${jococo.path}
+					</outputDirectory>
+				</configuration>
 				<executions>
 					<execution>
 						<id>report</id>
@@ -99,12 +111,13 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
 				</executions>
-				<configuration>
-					<outputDirectory>
-						${jococo.path}
-					</outputDirectory>
-				</configuration>
 			</plugin>
 
 			<plugin>
@@ -121,7 +134,7 @@
 							<inputSpec>${project.basedir}/swagger.yaml</inputSpec>
 							<language>spring</language>
 							<library>spring-boot</library>
-							<apiPackage>ru.seminar.homework.hw6.controller</apiPackage>
+							<apiPackage>ru.seminar.homework.hw6.controller.api</apiPackage>
 							<modelPackage>ru.seminar.homework.hw6.dto</modelPackage>
 							<generateApis>true</generateApis>
 							<generateApiTests>false</generateApiTests>

@@ -9,6 +9,7 @@ import ru.seminar.homework.hw6.dto.TaskDto;
 import ru.seminar.homework.hw6.dto.UpdateTaskDto;
 import ru.seminar.homework.hw6.enums.TaskStatus;
 import ru.seminar.homework.hw6.service.TaskService;
+import ru.seminar.homework.hw6.controller.api.TaskApi;
 
 import java.util.List;
 import java.util.Map;

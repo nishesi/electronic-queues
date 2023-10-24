@@ -10,10 +10,15 @@ import java.util.Optional;
 public interface TaskRepository {
     Task save(Task task);
 
+    void saveAll(List<Task> tasks);
+
     Optional<Task> findByNumber(String number);
 
-    void deleteByNumber(String number);
+    List<Task> findAll();
+
     List<Task> findAllByStatus(TaskStatus status);
+
+    void deleteByNumber(String number);
 
     Duration getAverageTasksProcessingTime();
 
