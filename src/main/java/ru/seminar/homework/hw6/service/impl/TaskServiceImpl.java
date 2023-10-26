@@ -43,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDto createTask() {
         Task task = new Task(idGenerator.generate(), NEW, LocalDateTime.now(clock), new HashMap<>());
         task = taskRepository.save(task);
-        return taskMapper.from(task);
+        return taskMapper.toTaskDto(task);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TaskServiceImpl implements TaskService {
 
         taskRepository.deleteByNumber(task.getNumber());
 
-        return taskMapper.from(task);
+        return taskMapper.toTaskDto(task);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskQueue.peek();
         if (task == null)
             throw new NotFoundException("No waiting tasks");
-        return taskMapper.from(task);
+        return taskMapper.toTaskDto(task);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(dto.getStatus());
         task = taskRepository.save(task);
 
-        return taskMapper.from(task);
+        return taskMapper.toTaskDto(task);
     }
 
     @Override
@@ -107,14 +107,17 @@ public class TaskServiceImpl implements TaskService {
         for (Task task : tasks) {
             TaskStatus status = task.getStatus();
 
-            if (status == WAITING || status == PROCESSED) {
-                LocalDateTime time = task.getLastUpdatedAt().plus(Duration.ofMinutes(30));
-                LocalDateTime now = LocalDateTime.now(clock);
-                if (time.isBefore(now)) {
-                    updateStatusTime(task);
-                    task.setStatus(CANCEL);
-                    task.setLastUpdatedAt(now);
-                }
+            if (status != WAITING && status != PROCESSED) continue;
+
+            LocalDateTime time = task.getLastUpdatedAt().plus(Duration.ofMinutes(30));
+            LocalDateTime now = LocalDateTime.now(clock);
+            if (time.isBefore(now)) {
+                updateStatusTime(task);
+                task.setStatus(CANCEL);
+                task.setLastUpdatedAt(now);
+
+                if (status == WAITING)
+                    taskQueue.remove(task);
             }
         }
         taskRepository.saveAll(tasks);
