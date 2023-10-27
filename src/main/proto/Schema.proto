@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package ru.seminar.homework.hw6.grpc;
+
+message CreateTaskRequest {
+
+}
+
+message DeleteTaskRequest {
+  string number = 1;
+}
+
+message GetNextWaitingTaskRequest {
+
+}
+
+message GetTaskNumbersGroupedByStatusesRequest {
+
+}
+
+message TaskNumbersGroupedByStatuses {
+  repeated Entry entries = 1;
+}
+
+message Entry {
+  string status = 1;
+  repeated string number = 2;
+}
+
+message UpdateTaskRequest {
+  string number = 1;
+  string status = 2;
+}
+
+message GrpcTaskResponse {
+  string number = 1;
+  string status = 2;
+}
+
+service TaskService {
+  rpc CreateTask (CreateTaskRequest) returns (GrpcTaskResponse);
+  rpc DeleteTask (DeleteTaskRequest) returns (GrpcTaskResponse);
+  rpc GetNextWaitingTask (GetNextWaitingTaskRequest) returns (GrpcTaskResponse);
+  rpc GetTaskNumbersGroupedByStatuses (GetTaskNumbersGroupedByStatusesRequest) returns (TaskNumbersGroupedByStatuses);
+  rpc UpdateTask (UpdateTaskRequest) returns (GrpcTaskResponse);
+}
+
+message GrpcTimeResponse {
+  int64
+      time = 1;
+}
+
+message GetAverageStatusProcessingTimeRequest {
+  string status = 1;
+}
+
+message Empty {
+
+}
+
+message GetTaskProcessingTimeRequest {
+  string number = 1;
+}
+
+message GetTaskStatusProcessingTimeRequest {
+  string number = 1;
+  string status = 2;
+}
+
+service ManagerService {
+  rpc getAverageStatusProcessingTime (GetAverageStatusProcessingTimeRequest) returns (GrpcTimeResponse);
+  rpc getAverageTaskProcessingTime (Empty) returns (GrpcTimeResponse);
+  rpc getTaskProcessingTime (GetTaskProcessingTimeRequest) returns (GrpcTimeResponse);
+  rpc getTaskStatusProcessingTime (GetTaskStatusProcessingTimeRequest) returns (GrpcTimeResponse);
+}
+
+message ExceptionResponse {
+  string code = 1;
+  string message = 2;
+}

@@ -1,15 +1,11 @@
 package ru.seminar.homework.hw6.controller.soap;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import ru.seminar.homework.hw6.*;
-import ru.seminar.homework.hw6.dto.StatusesWithTaskNumbersDto;
-import ru.seminar.homework.hw6.dto.TaskDto;
-import ru.seminar.homework.hw6.dto.UpdateTaskDto;
+import ru.seminar.homework.hw6.dto.*;
 import ru.seminar.homework.hw6.enums.TaskStatus;
 import ru.seminar.homework.hw6.mapper.TaskMapper;
 import ru.seminar.homework.hw6.service.TaskService;
@@ -20,7 +16,7 @@ import java.util.Map;
 @Endpoint
 @RequiredArgsConstructor
 public class TaskEndpoint {
-    private static final String NAMESPACE_URI = "http://seminar.ru/homework/hw6";
+    private static final String NAMESPACE_URI = "http://seminar.ru/homework/hw6/dto";
 
     private final TaskService taskService;
     private final TaskMapper taskMapper;
@@ -50,15 +46,17 @@ public class TaskEndpoint {
     @ResponsePayload
     public StatusesWithTaskNumbersResponse getTaskNumbersGroupedByStatuses() {
         Map<String, List<String>> result = taskService.getTaskNumbersGroupedByStatuses();
-        var dto = new StatusesWithTaskNumbersResponse();
-        var list = result.entrySet().stream().map(e -> {
+        List<MapEntry> list = result.entrySet().stream().map(e -> {
             var entry = new MapEntry();
             entry.setKey(e.getKey());
             entry.getValue().addAll(e.getValue());
             return entry;
         }).toList();
+
         var content = new ContentMap();
         content.getEntry().addAll(list);
+
+        var dto = new StatusesWithTaskNumbersResponse();
         dto.setContent(content);
         return dto;
     }

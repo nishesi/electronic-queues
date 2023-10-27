@@ -5,17 +5,17 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import ru.seminar.homework.hw6.GetAverageStatusProcessingTimeRequest;
-import ru.seminar.homework.hw6.GetTaskProcessingTimeRequest;
-import ru.seminar.homework.hw6.GetTaskStatusProcessingTimeRequest;
-import ru.seminar.homework.hw6.TimeResponse;
+import ru.seminar.homework.hw6.dto.GetAverageStatusProcessingTimeRequest;
+import ru.seminar.homework.hw6.dto.GetTaskProcessingTimeRequest;
+import ru.seminar.homework.hw6.dto.GetTaskStatusProcessingTimeRequest;
+import ru.seminar.homework.hw6.dto.TimeResponse;
 import ru.seminar.homework.hw6.dto.TimeDto;
 import ru.seminar.homework.hw6.service.StatisticsService;
 
 @Endpoint
 @RequiredArgsConstructor
 public class ManagerEndpoint {
-    private static final String NAMESPACE_URI = "http://seminar.ru/homework/hw6";
+    private static final String NAMESPACE_URI = "http://seminar.ru/homework/hw6/dto";
 
     private final StatisticsService statisticsService;
 
