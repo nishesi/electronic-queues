@@ -1,0 +1,16 @@
+logging:
+  level:
+    ru.seminar.homework.hw6: debug
+app:
+  security:
+    user:
+      username: user
+      password: password1
+    manager:
+      username: manager
+      password: password2
+debug: true
+trace: true
+server:
+  servlet:
+    context-path: /api

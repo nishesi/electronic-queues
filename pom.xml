@@ -112,6 +112,10 @@
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -166,6 +170,8 @@
                         <exclude>ru/seminar/**/exception/*</exclude>
                         <exclude>ru/seminar/**/mapper/*</exclude>
                         <exclude>ru/seminar/**/controller/api/*</exclude>
+                        <exclude>ru/seminar/**/controller/soap/*</exclude>
+                        <exclude>ru/seminar/**/grpc/*</exclude>
                     </excludes>
                     <outputDirectory>
                         ${jococo.path}

@@ -16,10 +16,7 @@ import ru.seminar.homework.hw6.service.TaskService;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static ru.seminar.homework.hw6.enums.TaskStatus.*;
@@ -104,6 +101,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void cancelLongTasks() {
         List<Task> tasks = taskRepository.findAll();
+        List<Task> updatedTasks = new ArrayList<>();
         for (Task task : tasks) {
             TaskStatus status = task.getStatus();
 
@@ -118,8 +116,9 @@ public class TaskServiceImpl implements TaskService {
 
                 if (status == WAITING)
                     taskQueue.remove(task);
+                updatedTasks.add(task);
             }
         }
-        taskRepository.saveAll(tasks);
+        taskRepository.saveAll(updatedTasks);
     }
 }

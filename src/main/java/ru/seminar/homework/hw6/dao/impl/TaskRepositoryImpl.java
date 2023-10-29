@@ -55,7 +55,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Override
     public Duration getAverageTasksProcessingTime() {
         List<Duration> times = data.values().stream()
-                .filter(t -> t.getStatus() != CANCEL && t.getStatus() != CLOSE)
+                .filter(t -> t.getStatus() == CANCEL || t.getStatus() == CLOSE)
                 .map(t -> t.getTimes().values().stream()
                         .reduce(Duration::plus)
                         .orElse(Duration.ZERO))
@@ -71,7 +71,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Override
     public Duration getAverageStatusProcessingTime(TaskStatus status) {
         List<Duration> times = data.values().stream()
-                .filter(t -> t.getStatus() != CANCEL && t.getStatus() != CLOSE)
+                .filter(t -> t.getStatus() == CANCEL || t.getStatus() == CLOSE)
                 .map(t -> t.getTimes().get(status))
                 .toList();
 
